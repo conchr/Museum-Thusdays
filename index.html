@@ -43,8 +43,14 @@
         }
         .landing-subtitle {
             font-size: 1.3em;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             opacity: 0.9;
+        }
+        .landing-address {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            opacity: 0.8;
+            font-style: italic;
         }
         .landing-button {
             padding: 15px 40px;
@@ -207,6 +213,9 @@
         <div class="landing-content" id="landingSubtitle">
             <div class="landing-subtitle">Γνώρισε την βαθιά ιστορία του τόπου μας</div>
         </div>
+        <div class="landing-content" id="landingAddress">
+            <div class="landing-address">Καναδά 9, Φάρσαλα</div>
+        </div>
         <div class="landing-content" id="landingButton">
             <button class="landing-button" id="startBooking">Κάνε Κράτηση</button>
         </div>
@@ -311,8 +320,12 @@
             }, 1500);
             
             setTimeout(() => {
-                document.getElementById('landingButton').classList.add('fade-in');
+                document.getElementById('landingAddress').classList.add('fade-in');
             }, 2500);
+            
+            setTimeout(() => {
+                document.getElementById('landingButton').classList.add('fade-in');
+            }, 3500);
         }
 
         function showThankYouLanding() {
@@ -322,6 +335,7 @@
                     <div class="thank-you-message">Ευχαριστούμε για την κράτηση</div>
                     <div class="landing-title">Πέμπτες στην Αρχαιολογική Συλλογή</div>
                     <div class="landing-subtitle">Γνώρισε την βαθιά ιστορία του τόπου μας</div>
+                    <div class="landing-address">Καναδά 9, Φάρσαλα</div>
                 </div>
             `;
             landingPage.style.display = 'flex';
