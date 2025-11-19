@@ -3,14 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Πέμπτες στο Μουσείο - Κράτηση</title>
+    <title>Πέμπτες στην Αρχαιολογική Συλλογή</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background-color: #f5f5f5;
         }
+        /* Landing Page Styles */
+        #landingPage {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 2000;
+        }
+        .landing-content {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease;
+        }
+        .landing-content.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .landing-title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .landing-subtitle {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .landing-button {
+            padding: 15px 40px;
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .landing-button:hover {
+            background-color: white;
+            color: #1e3c72;
+        }
+        .thank-you-message {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Booking Form Styles */
         .container { 
             max-width: 500px; 
             margin: 0 auto; 
@@ -18,6 +75,7 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none; /* Αρχικά κρυφό */
         }
         h1 {
             text-align: center;
@@ -141,8 +199,22 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Πέμπτες στο Μουσείο</h1>
+    <!-- Landing Page -->
+    <div id="landingPage">
+        <div class="landing-content" id="landingTitle">
+            <div class="landing-title">Πέμπτες στην Αρχαιολογική Συλλογή</div>
+        </div>
+        <div class="landing-content" id="landingSubtitle">
+            <div class="landing-subtitle">Γνώρισε την βαθιά ιστορία του τόπου μας</div>
+        </div>
+        <div class="landing-content" id="landingButton">
+            <button class="landing-button" id="startBooking">Κάνε Κράτηση</button>
+        </div>
+    </div>
+
+    <!-- Booking Form -->
+    <div class="container" id="bookingForm">
+        <h1>Πέμπτες στην Αρχαιολογική Συλλογή</h1>
         
         <div id="visitorSection">
             <div class="form-group">
@@ -208,6 +280,9 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🔵 Σελίδα φορτώθηκε - αναμονή για Supabase...');
             
+            // Εκκίνηση landing page animations
+            startLandingAnimations();
+            
             try {
                 // Περιμένουμε να φορτωθεί το Supabase
                 await waitForSupabase();
@@ -224,6 +299,34 @@
             }
         });
 
+        // Landing Page Animations
+        function startLandingAnimations() {
+            // Background appears immediately
+            setTimeout(() => {
+                document.getElementById('landingTitle').classList.add('fade-in');
+            }, 500);
+            
+            setTimeout(() => {
+                document.getElementById('landingSubtitle').classList.add('fade-in');
+            }, 1500);
+            
+            setTimeout(() => {
+                document.getElementById('landingButton').classList.add('fade-in');
+            }, 2500);
+        }
+
+        function showThankYouLanding() {
+            const landingPage = document.getElementById('landingPage');
+            landingPage.innerHTML = `
+                <div class="landing-content fade-in">
+                    <div class="thank-you-message">Ευχαριστούμε για την κράτηση</div>
+                    <div class="landing-title">Πέμπτες στην Αρχαιολογική Συλλογή</div>
+                    <div class="landing-subtitle">Γνώρισε την βαθιά ιστορία του τόπου μας</div>
+                </div>
+            `;
+            landingPage.style.display = 'flex';
+        }
+
         function initializeApp() {
             console.log('🔵 Αρχικοποίηση εφαρμογής');
             setupDatePicker();
@@ -237,12 +340,19 @@
             const submitButton = document.getElementById('submitButton');
             const successYes = document.getElementById('successYes');
             const successNo = document.getElementById('successNo');
+            const startBooking = document.getElementById('startBooking');
             
             submitButton.addEventListener('click', makeBooking);
             successYes.addEventListener('click', handleSuccessYes);
             successNo.addEventListener('click', handleSuccessNo);
+            startBooking.addEventListener('click', showBookingForm);
             
             console.log('✅ Event listeners ρυθμίστηκαν');
+        }
+
+        function showBookingForm() {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('bookingForm').style.display = 'block';
         }
 
         function setupDatePicker() {
@@ -258,16 +368,24 @@
             
             // Event listener για αλλαγή ημερομηνίας
             dateInput.addEventListener('change', function() {
-                const selectedDate = new Date(this.value);
-                const isThursday = selectedDate.getDay() === 4;
+                const dateString = this.value;
+                if (!dateString) return;
                 
-                if (this.value && !isThursday) {
+                // Δημιουργία ημερομηνίας από τα components για αποφυγή timezone issues
+                const [year, month, day] = dateString.split('-');
+                const selectedDate = new Date(year, month - 1, day);
+                const dayOfWeek = selectedDate.getDay();
+                const isThursday = dayOfWeek === 4;
+                
+                console.log(`📅 Επιλέχθηκε: ${dateString}, Ημέρα: ${dayOfWeek}, Είναι Πέμπτη: ${isThursday}`);
+                
+                if (!isThursday) {
                     showMessage('Παρακαλώ επιλέξτε μόνο Πέμπτες', 'error');
                     this.value = '';
                     document.getElementById('visitorCounter').textContent = '';
-                } else if (isThursday) {
+                } else {
                     clearMessage();
-                    checkAvailability(this.value);
+                    checkAvailability(dateString);
                 }
             });
         }
@@ -285,7 +403,8 @@
                     showMessage('Σφάλμα σύνδεσης με τη βάση δεδομένων: ' + error.message, 'error');
                 } else {
                     console.log('✅ Σύνδεση με Supabase OK');
-                    showMessage('Η εφαρμογή είναι έτοιμη για κρατήσεις!', 'success');
+                // Δεν εμφανίζουμε το μήνυμα στην landing page
+                // showMessage('Η εφαρμογή είναι έτοιμη για κρατήσεις!', 'success');
                     setTimeout(clearMessage, 3000);
                 }
             } catch (error) {
@@ -306,7 +425,17 @@
                     console.error('Σφάλμα ανάκτησης κρατήσεων:', error);
                     throw error;
                 }
+                
                 console.log('📋 Βρέθηκαν κρατήσεις:', data?.length || 0);
+                
+                // Debug: Εμφάνιση όλων των κρατήσεων που βρέθηκαν
+                if (data && data.length > 0) {
+                    console.log('📝 Λεπτομέρειες κρατήσεων:');
+                    data.forEach((booking, index) => {
+                        console.log(`   ${index + 1}. ${booking.date}: ${booking.name} - ${booking.people} άτομα`);
+                    });
+                }
+                
                 return data || [];
             } catch (error) {
                 console.error('Σφάλμα:', error);
@@ -319,21 +448,24 @@
 
             try {
                 const bookings = await getBookingsForDate(date);
-                const totalPeople = bookings.reduce((sum, booking) => sum + (booking.people || 1), 0);
+                const totalPeople = bookings.reduce((sum, booking) => sum + (parseInt(booking.people) || 1), 0);
                 const remaining = 30 - totalPeople;
 
                 const counter = document.getElementById('visitorCounter');
                 
+                console.log(`📊 Σύνολο ατόμων για ${date}: ${totalPeople}, Υπόλοιπο: ${remaining}`);
+                
                 if (totalPeople >= 30) {
-                    counter.textContent = `Δεν υπάρχουν διαθέσιμες θέσεις`;
+                    counter.textContent = `Δεν υπάρχουν διαθέσιμες θέσεις (${totalPeople}/30)`;
                     counter.className = `counter red`;
                     showMessage('Παρακαλώ επιλέξτε άλλη ημερομηνία', 'error');
                 } else {
-                    counter.textContent = `Υπάρχουν ακόμη ${remaining} ελεύθερες θέσεις`;
+                    counter.textContent = `Υπάρχουν ακόμη ${remaining} ελεύθερες θέσεις (${totalPeople}/30)`;
                     counter.className = `counter ${getCounterColor(totalPeople)}`;
                     clearMessage();
                 }
             } catch (error) {
+                console.error('Σφάλμα κατά τον έλεγχο διαθεσιμότητας:', error);
                 showMessage('Σφάλμα κατά τον έλεγχο διαθεσιμότητας', 'error');
             }
         }
@@ -349,24 +481,29 @@
             if (event) event.preventDefault();
             
             console.log('🎯 ΚΛΙΚ ΣΤΟ ΚΟΥΜΠΙ ΚΡΑΤΗΣΗΣ!');
-            console.log('🔍 Κατάσταση Supabase:', supabaseClient ? '✅ Διαθέσιμο' : '❌ Μη διαθέσιμο');
             
             const name = document.getElementById('visitorName').value.trim();
             const phone = document.getElementById('visitorPhone').value.trim();
-            const date = document.getElementById('visitorDate').value;
+            const dateString = document.getElementById('visitorDate').value;
             const people = parseInt(document.getElementById('visitorPeople').value);
             const submitButton = document.getElementById('submitButton');
 
-            console.log('📋 Στοιχεία φόρμας:', { name, phone, date, people });
+            console.log('📋 Στοιχεία φόρμας:', { name, phone, dateString, people });
 
             // Επικύρωση
-            if (!validateForm(name, phone, date, people)) {
+            if (!validateForm(name, phone, dateString, people)) {
                 return;
             }
 
-            // Έλεγχος ότι είναι Πέμπτη
-            const selectedDate = new Date(date);
-            if (selectedDate.getDay() !== 4) {
+            // Έλεγχος ότι είναι Πέμπτη - Χρησιμοποιούμε local date components
+            const [year, month, day] = dateString.split('-');
+            const selectedDate = new Date(year, month - 1, day);
+            const dayOfWeek = selectedDate.getDay();
+            const isThursday = dayOfWeek === 4;
+            
+            console.log(`📅 Επιβεβαίωση ημερομηνίας: ${dateString}, Ημέρα: ${dayOfWeek}, Είναι Πέμπτη: ${isThursday}`);
+
+            if (!isThursday) {
                 showMessage('Παρακαλώ επιλέξτε μόνο Πέμπτες', 'error');
                 return;
             }
@@ -380,10 +517,10 @@
                 console.log('🔍 Έλεγχος διαθεσιμότητας...');
                 
                 // Έλεγχος διαθεσιμότητας
-                const bookings = await getBookingsForDate(date);
-                const totalPeople = bookings.reduce((sum, booking) => sum + (booking.people || 1), 0);
+                const bookings = await getBookingsForDate(dateString);
+                const totalPeople = bookings.reduce((sum, booking) => sum + (parseInt(booking.people) || 1), 0);
                 
-                console.log(`📊 Υπάρχουν ${totalPeople} άτομα για ${date}`);
+                console.log(`📊 Υπάρχουν ${totalPeople} άτομα για ${dateString}`);
                 
                 if (totalPeople + people > 30) {
                     showMessage(`Δεν υπάρχουν διαθέσιμες θέσεις. Υπάρχουν ήδη ${totalPeople} άτομα.`, 'error');
@@ -395,7 +532,7 @@
                 const { data, error } = await supabaseClient
                     .from('bookings')
                     .insert([{ 
-                        date: date, 
+                        date: dateString, 
                         name: name, 
                         phone: phone, 
                         people: people 
@@ -408,6 +545,9 @@
                 }
 
                 console.log('✅ Επιτυχής κράτηση!', data);
+                
+                // Ενημέρωση του μετρητή αμέσως μετά την επιτυχημένη κράτηση
+                await checkAvailability(dateString);
                 showSuccessModal();
                 
             } catch (error) {
@@ -474,12 +614,17 @@
 
         function handleSuccessNo() {
             hideSuccessModal();
+            // Καθαρισμός όλων των πεδίων
             document.getElementById('visitorName').value = '';
             document.getElementById('visitorPhone').value = '';
             document.getElementById('visitorDate').value = '';
             document.getElementById('visitorPeople').value = '1';
             document.getElementById('visitorCounter').textContent = '';
             clearMessage();
+            
+            // Επιστροφή στην landing page με μήνυμα ευχαριστιών
+            document.getElementById('bookingForm').style.display = 'none';
+            showThankYouLanding();
         }
     </script>
 </body>
